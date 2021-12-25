@@ -1,33 +1,45 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <limits>
+
 struct GraphVertex {
     struct DistanceEdges {
         int distance, min_num_edges;
-    }
-    DistanceEdges distance_edges = DistanceEdges{numeric_limits<int>::max(), 0};
+    };
+    DistanceEdges distance_edges = DistanceEdges{std::numeric_limits<int>::max(), 0};
 
     struct VertexDistance {
         GraphVertex& vertex;
         int distance;
     };
-    vector<VertexDistance> edges;
+    std::vector<VertexDistance> edges;
     int id;
     const GraphVertex* pred = nullptr;
 };
 
 struct GraphVertexComp {
     bool operator()(const GraphVertex* lhs, const GraphVertex* rhs) {
-        return lhs->distance_edges.distance < rhs.distance_edges.distance
-            || (lhs->distance_edges.distance == rhs.distance_edges.distance &&
+        return lhs->distance_edges.distance < rhs->distance_edges.distance
+            || (lhs->distance_edges.distance == rhs->distance_edges.distance &&
                 lhs->distance_edges.min_num_edges < rhs->distance_edges.min_num_edges);
     }
 };
 
+void OutputShortestPath(const GraphVertex* v) {
+    if (v) {
+        OutputShortestPath(v->pred);
+        std::cout << v->id << " ";
+    }
+} 
+
 void DijkstraShortestPath(GraphVertex* s, const GraphVertex* t) {
     s->distance_edges = {0, 0};
-    set<GraphVertex*, GraphVertexComp> node_set;
+    std::set<GraphVertex*, GraphVertexComp> node_set;
     node_set.emplace(s);
 
     while (!node_set.empty()) {
-        GraphVertex* u = *node_set.cbegin():
+        GraphVertex* u = *node_set.cbegin();
         if (u->id == t->id) break;
         node_set.erase(node_set.cbegin());
 
@@ -47,10 +59,32 @@ void DijkstraShortestPath(GraphVertex* s, const GraphVertex* t) {
 
     OutputShortestPath(t);
 }
-              
-void OutputShortestPath(const GraphVertex* v) {
-    if (v) {
-        OutputShortestPath(v->pred);
-        cout << v->id << " ";
-    }
-} 
+
+int main() {
+    std::cout << "Hi";
+    GraphVertex a, b, c, d, e, f;
+    a.id = 1, b.id = 2, c.id = 3, d.id = 4, e.id = 5, f.id = 6;
+    
+    a.edges.emplace_back(GraphVertex::VertexDistance{b, 14});
+    a.edges.emplace_back(GraphVertex::VertexDistance{c, 9});
+    a.edges.emplace_back(GraphVertex::VertexDistance{d, 10});
+    b.edges.emplace_back(GraphVertex::VertexDistance{a, 14});
+    b.edges.emplace_back(GraphVertex::VertexDistance{c, 2});
+    b.edges.emplace_back(GraphVertex::VertexDistance{e, 9});
+    c.edges.emplace_back(GraphVertex::VertexDistance{a, 9});
+    c.edges.emplace_back(GraphVertex::VertexDistance{b, 2});
+    c.edges.emplace_back(GraphVertex::VertexDistance{d, 10});
+    c.edges.emplace_back(GraphVertex::VertexDistance{f, 11});
+    d.edges.emplace_back(GraphVertex::VertexDistance{a, 7});
+    d.edges.emplace_back(GraphVertex::VertexDistance{c, 10});
+    d.edges.emplace_back(GraphVertex::VertexDistance{f, 15});
+    e.edges.emplace_back(GraphVertex::VertexDistance{b, 9});
+    e.edges.emplace_back(GraphVertex::VertexDistance{f, 6});
+    f.edges.emplace_back(GraphVertex::VertexDistance{c, 11});
+    f.edges.emplace_back(GraphVertex::VertexDistance{d, 15});
+    f.edges.emplace_back(GraphVertex::VertexDistance{e, 6});
+    
+    DijkstraShortestPath(&a, &e);
+    
+    return 0;
+}
