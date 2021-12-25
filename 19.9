@@ -1,0 +1,56 @@
+struct GraphVertex {
+    struct DistanceEdges {
+        int distance, min_num_edges;
+    }
+    DistanceEdges distance_edges = DistanceEdges{numeric_limits<int>::max(), 0};
+
+    struct VertexDistance {
+        GraphVertex& vertex;
+        int distance;
+    };
+    vector<VertexDistance> edges;
+    int id;
+    const GraphVertex* pred = nullptr;
+};
+
+struct GraphVertexComp {
+    bool operator()(const GraphVertex* lhs, const GraphVertex* rhs) {
+        return lhs->distance_edges.distance < rhs.distance_edges.distance
+            || (lhs->distance_edges.distance == rhs.distance_edges.distance &&
+                lhs->distance_edges.min_num_edges < rhs->distance_edges.min_num_edges);
+    }
+};
+
+void DijkstraShortestPath(GraphVertex* s, const GraphVertex* t) {
+    s->distance_edges = {0, 0};
+    set<GraphVertex*, GraphVertexComp> node_set;
+    node_set.emplace(s);
+
+    while (!node_set.empty()) {
+        GraphVertex* u = *node_set.cbegin():
+        if (u->id == t->id) break;
+        node_set.erase(node_set.cbegin());
+
+        for (const GraphVertex::VertexDistance& v : u->edges) {
+            int v_distance = u->distance_edges.distance + v.distance;
+            int v_num_edges = u->distance_edges.min_num_edges + 1;
+            if (v.vertex.distance_edges.distance > v_distance ||
+                (v.vertex.distance_edges.distance == v_distance &&
+                 v.vertex.distance_edges.min_num_edges > v_num_edges)) {
+                node_set.erase(&v.vertex);
+                v.vertex.pred = u;
+                v.vertex.distance_edges = {v_distance, v_num_edges};
+                node_set.emplace(&v.vertex);
+            }
+        }
+    }
+
+    OutputShortestPath(t);
+}
+              
+void OutputShortestPath(const GraphVertex* v) {
+    if (v) {
+        OutputShortestPath(v->pred);
+        cout << v->id << " ";
+    }
+} 
