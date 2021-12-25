@@ -1,0 +1,44 @@
+#include <iostream>
+#include <unordered_set>
+#include <string>
+#include <queue>
+
+int TransformString(std::unordered_set<std::string> D, const std::string& s, const std::string& t) {
+    struct StringWithDistance {
+        std::string candidate_string;
+        int distance;
+    };
+    
+    std::queue<StringWithDistance> q;
+    D.erase(s);
+    q.emplace(StringWithDistance{s, 0});
+
+    while (!q.empty()) {
+        StringWithDistance curr(q.front());
+        if (curr.candidate_string == t) return curr.distance;
+
+        std::string curr_s = curr.candidate_string;
+        for (int i = 0; i < curr_s.size(); ++i) {
+            for (int j = 0; j < 26; ++j) {
+                curr_s[i] = 'a' + j;
+                auto it(D.find(curr_s));
+                if (it != D.end()) {
+                    D.erase(it);
+                    q.emplace(StringWithDistance{curr_s, curr.distance + 1});
+                }
+            }
+            curr_s[i] = curr.candidate_string[i];
+        }
+        q.pop();
+    }
+
+    return -1;
+}
+
+int main() {
+    std::unordered_set<std::string> dictionary{"bat", "cot", "dog", "dag", "dot", "cat"};
+    for (auto word : dictionary) std::cout << word << std::endl;
+    std::cout << TransformString(dictionary, "cat", "dog");
+    
+    return 0;
+}
